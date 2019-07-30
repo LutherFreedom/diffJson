@@ -1,0 +1,9 @@
+
+DIR >carTradeOrPledges>row 0>usecharacter>amount KEY amount is different; source is 0111, target is 0
+DIR >carTradeOrPledges>row 0>usecharacter target more one key balance, value is 0
+DIR >carTradeOrPledges>row 0>usecharacter target more one key balance, value is 0
+DIR >serialNo KEY serialNo is different; source is 20180801000059120191625, target is 2018080100005920191625
+DIR >forceExecutions>row 0>amount KEY amount is different; source is 2, target is 0
+DIR >forceExecutions>row 1>amount KEY amount is different; source is 3, target is 0
+DIR >forceExecutions target more one row 2, data is {"amount":"0","balance":"0","count":"0"}
+DIR >subsistenceAllowanceRecord target miss key subsistenceAllowanceRecord
