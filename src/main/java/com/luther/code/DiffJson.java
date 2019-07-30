@@ -29,9 +29,14 @@ public class DiffJson {
 
     public static void diffJson(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
         DiffJson diffJson = new DiffJson();
-        diffJson.init(sourceFilePath, targetFilePath, resultFilePath);
-        diffJson.doDiff();
-        diffJson.destroy();
+        try {
+            diffJson.init(sourceFilePath, targetFilePath, resultFilePath);
+            diffJson.doDiff();
+        } catch (Exception e) {
+            diffJson.write(e.getMessage());
+        } finally {
+            diffJson.destroy();
+        }
     }
 
     private void init(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
@@ -57,8 +62,10 @@ public class DiffJson {
     }
 
     private void destroy() throws IOException {
-        bw.flush();
-        bw.close();
+        if (bw != null) {
+            bw.flush();
+            bw.close();
+        }
     }
 
     private void compareJSON(String source, String target) throws IOException {
@@ -134,6 +141,11 @@ public class DiffJson {
         }
     }
 
+    private void write(String content) throws IOException {
+        bw.newLine();
+        bw.append(content);
+    }
+
     private void write(BufferedWriter bw, String content) throws IOException {
         bw.newLine();
         bw.append(content);
@@ -142,6 +154,7 @@ public class DiffJson {
     private String parseFile2Str(String filePath) throws IOException {
         return parseFile2Str(new File(filePath));
     }
+
     private String parseFile2Str(File file) throws IOException {
         if (!file.exists()) {
             throw new FileNotFoundException(file + "NOT FOUND");
