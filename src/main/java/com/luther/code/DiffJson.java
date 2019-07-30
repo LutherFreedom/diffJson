@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -32,7 +34,7 @@ public class DiffJson {
         diffJson.destroy();
     }
 
-    public void init(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
+    private void init(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
 
         File sourceFile = new File(sourceFilePath);
         joaStr = parseFile2Str(sourceFile);
@@ -45,6 +47,9 @@ public class DiffJson {
             resultFile.createNewFile();
         }
         bw = new BufferedWriter(new FileWriter(resultFile));
+        bw.newLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        bw.append(LocalDateTime.now().format(formatter));
     }
 
     private void doDiff() throws IOException {
@@ -63,7 +68,7 @@ public class DiffJson {
         } else if (JSONObject.isValidObject(source) && JSONObject.isValidObject(target)) {
             compareJSON(JSONObject.parseObject(source), JSONObject.parseObject(target), "", "");
         } else {
-            write(bw, MessageTemplate.DIFFTYPE.getTempldate());
+            write(bw, MessageTemplate.DIFFTYPE.getTemplate());
         }
     }
 
@@ -71,14 +76,14 @@ public class DiffJson {
         for (int i = 0; i < source.size(); i++) {
             Object temp = source.get(i);
             if (i + 1 > target.size()) {
-                write(bw, String.format(MessageTemplate.MISSROW.getTempldate(), dir, i, temp));
+                write(bw, String.format(MessageTemplate.MISSROW.getTemplate(), dir, i, temp));
                 continue;
             }
             compareJSON(source.get(i), target.get(i), key, dir + ">" + "row " + i);
         }
         if (source.size() < target.size()) {
             for (int i = source.size(); i < target.size(); i++) {
-                write(bw, String.format(MessageTemplate.MOREROW.getTempldate(), dir, i, target.get(i)));
+                write(bw, String.format(MessageTemplate.MOREROW.getTemplate(), dir, i, target.get(i)));
 
             }
         }
@@ -97,7 +102,7 @@ public class DiffJson {
             Iterator<String> targetKeys = source.keySet().iterator();
             while (targetKeys.hasNext()) {
                 String targetKey = targetKeys.next();
-                write(bw, String.format(MessageTemplate.MOREKEY.getTempldate(), dir, key, target.get(targetKey)));
+                write(bw, String.format(MessageTemplate.MOREKEY.getTemplate(), dir, key, target.get(targetKey)));
             }
         }
 
@@ -105,17 +110,17 @@ public class DiffJson {
 
     private void compareJSON(Object source, Object target, String key, String dir) throws IOException {
         if (target == null) {
-            write(bw, String.format(MessageTemplate.MISSKEY.getTempldate(), dir, key));
+            write(bw, String.format(MessageTemplate.MISSKEY.getTemplate(), dir, key));
             return;
         }
         if (source instanceof JSONObject) {
             if (!(target instanceof JSONObject)) {
-                throw new IllegalArgumentException(String.format(MessageTemplate.CASTEXEOBJ.getTempldate(), dir));
+                throw new IllegalArgumentException(String.format(MessageTemplate.CASTEXEOBJ.getTemplate(), dir));
             }
             compareJSON((JSONObject) source, (JSONObject) target, key, dir);
         } else if (source instanceof JSONArray) {
             if (!(target instanceof JSONArray)) {
-                throw new IllegalArgumentException(String.format(MessageTemplate.CASTEXEARR.getTempldate(), dir));
+                throw new IllegalArgumentException(String.format(MessageTemplate.CASTEXEARR.getTemplate(), dir));
             }
             compareJSON((JSONArray) source, (JSONArray) target, key, dir);
         } else {
@@ -125,13 +130,13 @@ public class DiffJson {
 
     private void compareJSON(String source, String target, String key, String dir) throws IOException {
         if (!source.equals(target)) {
-            write(bw, String.format(MessageTemplate.DIFF.getTempldate(), dir, key, source, target));
+            write(bw, String.format(MessageTemplate.DIFF.getTemplate(), dir, key, source, target));
         }
     }
 
     private void write(BufferedWriter bw, String content) throws IOException {
         bw.newLine();
-        bw.write(content);
+        bw.append(content);
     }
 
     private String parseFile2Str(String filePath) throws IOException {
@@ -160,14 +165,14 @@ public class DiffJson {
         DIFF("DIR %s KEY %s is different; source is %s, target is %s"),
         CASTEXEOBJ("DIR %s target can not cast JSONObject"),
         CASTEXEARR("DIR %s target can not cast JSONArray");
-        private String templdate;
+        private String template;
 
-        MessageTemplate(String templdate) {
-            this.templdate = templdate;
+        MessageTemplate(String template) {
+            this.template = template;
         }
 
-        public String getTempldate() {
-            return templdate;
+        public String getTemplate() {
+            return template;
         }
     }
 }
