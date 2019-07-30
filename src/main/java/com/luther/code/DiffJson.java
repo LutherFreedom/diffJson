@@ -27,10 +27,10 @@ public class DiffJson {
     private File resultFile;
     private BufferedWriter bw;
 
-    public static void diffJson(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
+    public static void diffJson(String sourceFilePath, String targetFilePath, String resultFilePath, boolean append) throws IOException {
         DiffJson diffJson = new DiffJson();
         try {
-            diffJson.init(sourceFilePath, targetFilePath, resultFilePath);
+            diffJson.init(sourceFilePath, targetFilePath, resultFilePath, append);
             diffJson.doDiff();
         } catch (Exception e) {
             diffJson.write(e.getMessage());
@@ -39,7 +39,11 @@ public class DiffJson {
         }
     }
 
-    private void init(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
+    public static void diffJson(String sourceFilePath, String targetFilePath, String resultFilePath) throws IOException {
+        diffJson(sourceFilePath, targetFilePath, resultFilePath, Boolean.FALSE);
+    }
+
+    private void init(String sourceFilePath, String targetFilePath, String resultFilePath, boolean append) throws IOException {
 
         File sourceFile = new File(sourceFilePath);
         joaStr = parseFile2Str(sourceFile);
@@ -51,7 +55,7 @@ public class DiffJson {
         if (!resultFile.exists()) {
             resultFile.createNewFile();
         }
-        bw = new BufferedWriter(new FileWriter(resultFile));
+        bw = new BufferedWriter(new FileWriter(resultFile, append));
         bw.newLine();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         bw.append(LocalDateTime.now().format(formatter));
@@ -63,6 +67,7 @@ public class DiffJson {
 
     private void destroy() throws IOException {
         if (bw != null) {
+            bw.newLine();
             bw.flush();
             bw.close();
         }
